@@ -486,7 +486,134 @@ for (n in n_values) {
 }
 ```
 
-**Next, proceed with all the remaining steps**
+**Next, proceed with all the remaining steps**\
+
+```{r}
+id <- 15
+v1 <- id + 10
+# v1 = 25
+
+v <- N * v1
+# S = X1 + X2 + ..... + X100
+
+mu_Xi <- 1 / v
+sigma_Xi <- 1 / v
+
+mu_S = 100 * mu_Xi
+```
+
+#### METHOD 1: Markov's Inequality - P(X ≥ a) ≤ E[X]​/a
+
+**For our problem:**
+
+P(S \> 60) ≥ 0.95 and it\`s the same if P(S \< 60) ≤ 0.05
+
+But Markov's inequality works for P(X \> a) so we'll use:
+
+P(S ≥ 60) ≥ 1 − P(S \< 60) ≥ 0.95
+
+P(S \< 60) ≥ E(S)/60 = 100/v\*60 = 100 / (N \* 25) \* 60
+
+P(S ≥ 60) ≥ 1 − 100 / (N \* 25) \* 60 ≥ 0.95
+
+1 − 100 / (N \* 25) \* 60 ≥ 0.95
+
+100 / (N \* 25) \* 60 ≤ 0.05
+
+N ≤ 100 / 3 \* 25
+
+=\> N ≤ 1.3333
+
+#### METHOD 3: Central Limit Theorem
+
+**For our problem:**
+
+P(S \> 60) ≥ 0.95
+
+According to the Central Limit Theorem, the sum (or average) of a large number of independent random variables is approximately normally distributed:
+
+S \~ N(μ_S, σ²_S)
+
+where:
+
+-   μ_S = 100 / (N·ν₁)
+
+-   σ_S = 10 / (N·ν₁)
+
+We need to find N such that P(S ≥ 60) ≥ 0.95.
+
+P(S ≥ 60) = P((S - μ_S)/σ_S ≥ (60 - μ_S)/σ_S) ≥ 0.95
+
+=\> P(Z ≥ (60 - μ_S)/σ_S) = 1 - P(Z \< (60 - μ_S)/σ_S)) = 1 - Φ((60 - μ_S)/σ_S) ≥ 0.95\
+1 - Φ((60 - μ_S)/σ_S) ≥ 0.95\
+Φ((60 - μ_S)/σ_S) ≤ 0.05
+
+Substituting μ_S and σ_S:
+
+(60 - 100/(N·ν₁)) / (10/(N·ν₁)) ≤ -1.645\
+(60·N·ν₁ - 100) / 10 ≤ -1.645\
+60·N·ν₁ - 100 ≤ -16.45\
+N ≤ (100 - 16.45) / (60·ν₁)
+
+N ≤ 83.55 / (60·25) ≤ 0.0555
+
+```{r}
+N_markov <- floor(100 / (3 * v1))
+cat("N_max (Markov) =", N_markov, "\n\n")
+
+
+
+
+N_clt <- floor((100 - 16.45) / (60 * v1))
+
+cat("N_max (CLT) =", N_clt, "\n\n")
+
+cat("Method comparison\n")
+cat("Markov:   N ≤", N_markov, "\n")
+#cat("Chernoff: N ≤", N_chernoff, "\n")
+cat("CLT:      N ≤", N_clt, "\n")
+
+```
+
+-   simulate the realization $x_1,x_2,\dots,x_{100}$ of the $X_i$ and of the sum $S = X_1 + \cdots + X_{100}$;
+
+```{r}
+N_predicted <- N_clt 
+N <-1
+v1_c <- v1
+v <- N * v1_c
+
+cat(paste("Simulation for N = 1", "with rate v =", round(v, 7), "clicks/с.\n"))
+
+x_realization <- rexp(100, rate = v)
+S_realization <- sum(x_realization)
+
+cat(paste("One realization for S = X_1 + ... + X_100:", round(S_realization, 2), "с.\n"))
+cat(head(x_realization))
+```
+
+-   repeat this $K$ times to get the sample $\mathbf{s}=(s_1,\dots,s_K)$ of total times until the $100^{\mathrm{th}}$ click;
+
+```{r}
+n_clicks <- 100
+K <- 1000
+
+s_sample <- colSums(matrix(rexp(n_clicks * K, rate = v), nrow = n_clicks, ncol = K))
+
+cat(head(s_sample))
+```
+
+-   estimate the probability that the location is identified as safe and compare to the desired level $0.95$
+
+```{r}
+safe_count <- sum(s_sample > 60)
+
+empirical_prob <- safe_count / K 
+
+cat(paste("Number of safe cases (S > 60s):", safe_count, "out of", K, "\n"))
+cat(paste("Empirical probability of safety P(S > 60):", empirical_prob, "\n"))
+cat(paste("Desired probability level:", 0.95, "\n"))
+```
 
 **Do not forget to include several sentences summarizing your work and the conclusions you have made!**
 
@@ -660,3 +787,4 @@ for (n in n_values) {
 ### General summary and conclusions
 
 Summarize here what you've done, whether you solved the tasks, what difficulties you had etc.
+
