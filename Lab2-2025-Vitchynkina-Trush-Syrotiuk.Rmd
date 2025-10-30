@@ -63,9 +63,9 @@ $$
 #### First, we set the **id** of the team and define the probability $p$ and the generator and parity-check matrices $G$ and $H$
 
 ```{r}
-# your team id number 
+# your team id number = 15
                           ###
-id <- 50                  ### Change to the correct id!
+id <- 15                  ### Change to the correct id!
                           ###
 set.seed(id)
 p <- id/100
@@ -74,37 +74,137 @@ G <- matrix(c(1, 1, 1, 0, 0, 0, 0,
 		1, 0, 0, 1, 1, 0, 0,
 		0, 1, 0, 1, 0, 1, 0,
 		1, 1, 0, 1, 0, 0, 1), nrow = 4, byrow = TRUE)
-H <- t(matrix(c(1, 0, 1, 0, 1, 0, 1,
-		0, 1, 1, 0, 0, 1, 1,
-		0, 0, 0, 1, 1, 1, 1), nrow = 3, byrow = TRUE))
-# cat("The matrix G is: \n") 
-#G  
-#cat("The matrix H is: \n") 
-#H
-#cat("The product GH must be zero: \n")
-#(G%*%H) %%2
+H <- matrix(c(
+  1,0,0,
+  0,1,0,
+  1,1,0,
+  0,0,1,
+  1,0,1,
+  0,1,1,
+  1,1,1
+), nrow = 7, byrow = TRUE)
+cat("The matrix G is: \n") 
+G  
+cat("The matrix H is: \n") 
+H
+cat("The product GH must be zero: \n")
+(G%*%H) %%2
 ```
 
 #### Next, generate the messages
 
 ```{r}
 # generate N messages
+N = 10000
 
 message_generator <- function(N) {
   matrix(sample(c(0,1), 4*N, replace = TRUE), nrow = N)
 }  
-messages <- message_generator(100)
+messages <- message_generator(N)
 codewords <- (messages %*% G) %% 2
 ```
 
 #### Generate random errors; do not forget that they occur with probability $p$! Next, generate the received messages
 
 ```{r}
-#  errors <- ...
-#  received <-   
+errors   <- matrix(rbinom(N * 7, size = 1, prob = p), nrow = N)
+received <- (codewords + errors) %% 2 
 ```
 
 The next steps include detecting the errors in the received messages, correcting them, and then decoding the obtained messages. After this, you can continue with calculating all the quantities of interest
+
+```{r}
+synd <- (received %*% H) %% 2
+idx  <- synd[, 1] + 2 * synd[, 2] + 4 * synd[, 3]
+
+
+corrected <- received
+mask <- idx >= 1 & idx <= 7
+r_idx <- which(mask)
+c_idx <- idx[mask]
+if (length(r_idx)) {
+  corrected[cbind(r_idx, c_idx)] <- (corrected[cbind(r_idx, c_idx)] + 1) %% 2
+}
+
+decoded <- cbind(corrected[, 3], corrected[, 5], corrected[, 6], corrected[, 7])  # N x 4
+
+success_vec <- as.integer(rowSums(decoded != messages) == 0)
+errs_vec    <- rowSums(decoded != messages)
+```
+
+
+```{r}
+# estimates the empirical success probability, compares it with the theoretical value
+# constructs a 95% confidence interval based on the Central Limit Theorem
+phat <- mean(success_vec)
+phat
+
+
+pstar_theor <- (1 - p)^7 + 7 * p * (1 - p)^6
+c(phat = phat, pstar_theor = pstar_theor, abs_diff = abs(phat - pstar_theor))
+
+
+# Constructing a 95% Confidence Interval for p*
+z  <- qnorm(0.975)
+se <- sqrt(phat * (1 - phat) / N)
+eps <- z * se 
+
+
+c(se = se, eps = eps,
+  CI_low = max(0, phat - eps),
+  CI_high = min(1, phat + eps))
+
+N_needed <- ceiling((z^2 * 0.25) / (0.03^2))
+N_needed
+```
+
+## Justifiacation
+
+p^ - sample mean of Bernoulli outcomes(success = 1, failure = 0)
+
+By the Law of Large Numbers< the sample mean converges to the true probability p* as N increases.
+
+By the Central Limit Theorem, for large N the distribution of p^ is normal
+
+p^ ~ (p*, p*(1-p*) / N)
+
+This allows to build the 95% confidence interval
+
+p^ +- sqrt(p^(1-p^)/N)
+
+
+Theoretical value:
+p* = (1 - p)^7 + 7p * (1-p)^6
+
+,because the code can correct only one bit error.
+
+```{r}
+# Histogram of the number of bit errors in the decoded 4-bit message
+hist(errs_vec,
+     breaks = seq(-0.5, 4.5, by = 1),
+     probability = TRUE,
+     col = "lightblue",
+     main = "Number of errors in the decoded 4-bit message",
+     xlab = "Number of bit errors")
+```
+
+
+The number of wrong bits after decoding does not follow a standard distribution.
+Even though transmission errors are independent, the Hamming decoding process makes the output bits dependent on each other.
+Because of that, this random variable is not binomial — the condition of independence between trials is not satisfied.
+
+
+
+##Conclusion
+
+The simulation shows that the probability p^ of correct transmission is almost the same as the theoretical value p∗ 
+
+This happens because the bit error probability p = 0.15 is relatively low, so most messages are transmitted without errors or with only one error, which the Hamming code can correct.
+
+The 95% confidence interval is narrow, meaning our estimate is reliable when the number of simulations N is large.
+The histogram confirms this: most decoded messages have zero errors, and only a few have one or two, as expected for a code that corrects single-bit errors.
+
+Overall, the results match the theory and make sense for an error-correcting code with a low noise level.
 
 **Do not forget to include several sentences summarizing your work and the conclusions you have made!**
 
