@@ -1672,6 +1672,9 @@ result in point deduction regardless of whether or not your
 implementation is correct.</li>
 </ul>
 <hr />
+<p><strong>Sofiia Vitchynkina : Task 1</strong></p>
+<p><strong>Sofiia Trush : Task 3 and Task 4</strong></p>
+<p><strong>Viktor Syrotiuk : Task 2</strong></p>
 <div id="task-1" class="section level3">
 <h3>Task 1</h3>
 <div id="in-this-task-we-discuss-the-74-hamming-code-and-investigate-its-reliability.-that-coding-system-can-correct-single-errors-in-the-transmission-of-4-bit-messages-and-proceeds-as-follows" class="section level4">
@@ -1900,8 +1903,6 @@ have one or two, as expected for a code that corrects single-bit
 errors.</p>
 <p>Overall, the results match the theory and make sense for an
 error-correcting code with a low noise level.</p>
-<p><strong>Do not forget to include several sentences summarizing your
-work and the conclusions you have made!</strong></p>
 <hr />
 <div id="task-2." class="section level3">
 <h3>Task 2.</h3>
@@ -1972,8 +1973,8 @@ desired level <span class="math inline">\(0.95\)</span></li>
 T &lt;- T_years * 365 * 24 * 3600
 lambda &lt;- log(2) / T
 
-team_id &lt;- 15
-m &lt;- team_id * 10^-6
+id &lt;- 15
+m &lt;- id * 10^-6
 
 M &lt;- 137
 N_A &lt;- 6 * 10^23
@@ -2310,6 +2311,15 @@ mu_S = 100 * mu_Xi</code></pre>
 <p>N ≤ 100 / 3 * 25</p>
 <p>=&gt; N ≤ 1.3333</p>
 </div>
+<div id="method-2-chernoff-bound" class="section level4">
+<h4>METHOD 2: Chernoff bound</h4>
+<p>For the exponential distribution, the moment generating function
+(MGF) is: M_X(t) = ν / (ν - t) for t &lt; ν</p>
+<p>P(S ≥ 60) = P(e^(tS) ≥ e^(60t)) ≤ E[e^(tS)] / e^(60t)</p>
+<p>For the sum of 100 independent variables: M_S(t) = (ν / (ν -
+t))^100</p>
+<p>We minimize the right-hand side with respect to t &lt; ν.</p>
+</div>
 <div id="method-3-central-limit-theorem" class="section level4">
 <h4>METHOD 3: Central Limit Theorem</h4>
 <p><strong>For our problem:</strong></p>
@@ -2335,20 +2345,37 @@ distributed:</p>
 60·N·ν₁ - 100 ≤ -16.45<br />
 N ≤ (100 - 16.45) / (60·ν₁)</p>
 <p>N ≤ 83.55 / (60·25) ≤ 0.0555</p>
-<pre class="r"><code>N_markov &lt;- floor(100 / (3 * v1))
-cat(&quot;N_max (Markov) =&quot;, N_markov, &quot;\n\n&quot;)</code></pre>
+<pre class="r"><code>N_markov &lt;- 100 / (3 * v1)
+cat(&quot;N_max (Markov) =&quot;, floor(N_markov), &quot;\n&quot;)</code></pre>
 <pre><code>## N_max (Markov) = 1</code></pre>
-<pre class="r"><code>N_clt &lt;- floor((100 - 16.45) / (60 * v1))
+<pre class="r"><code>chernoff_bound &lt;- function(N, v1, target = 60) {
+  v &lt;- N * v1
 
-cat(&quot;N_max (CLT) =&quot;, N_clt, &quot;\n\n&quot;)</code></pre>
+  t_opt &lt;- v - 100/target  
+  if (t_opt &gt;= v || t_opt &lt;= 0) return(Inf)
+  
+  bound &lt;- ((v/(v - t_opt))^100) * exp(-t_opt * target)
+  return(bound)
+}
+
+N_test &lt;- 0.1:1
+chernoff_values &lt;- sapply(N_test, function(N) chernoff_bound(N, v1))
+N_chernoff &lt;- max(N_test[chernoff_values &lt;= 0.05])
+
+cat(&quot;N_max (Chernoff) =&quot;, N_chernoff, &quot;\n&quot;)</code></pre>
+<pre><code>## N_max (Chernoff) = 0.1</code></pre>
+<pre class="r"><code>N_clt &lt;- (100 - 16.45) / (60 * v1)
+
+cat(&quot;N_max (CLT) =&quot;, floor(N_clt), &quot;\n&quot;)</code></pre>
 <pre><code>## N_max (CLT) = 0</code></pre>
 <pre class="r"><code>cat(&quot;Method comparison\n&quot;)</code></pre>
 <pre><code>## Method comparison</code></pre>
 <pre class="r"><code>cat(&quot;Markov:   N ≤&quot;, N_markov, &quot;\n&quot;)</code></pre>
-<pre><code>## Markov:   N ≤ 1</code></pre>
-<pre class="r"><code>#cat(&quot;Chernoff: N ≤&quot;, N_chernoff, &quot;\n&quot;)
-cat(&quot;CLT:      N ≤&quot;, N_clt, &quot;\n&quot;)</code></pre>
-<pre><code>## CLT:      N ≤ 0</code></pre>
+<pre><code>## Markov:   N ≤ 1.333333</code></pre>
+<pre class="r"><code>cat(&quot;Chernoff: N ≤&quot;, N_chernoff, &quot;\n&quot;)</code></pre>
+<pre><code>## Chernoff: N ≤ 0.1</code></pre>
+<pre class="r"><code>cat(&quot;CLT:      N ≤&quot;, N_clt, &quot;\n&quot;)</code></pre>
+<pre><code>## CLT:      N ≤ 0.0557</code></pre>
 <ul>
 <li>simulate the realization <span class="math inline">\(x_1,x_2,\dots,x_{100}\)</span> of the <span class="math inline">\(X_i\)</span> and of the sum <span class="math inline">\(S = X_1 + \cdots + X_{100}\)</span>;</li>
 </ul>
@@ -2392,8 +2419,16 @@ cat(paste(&quot;Number of safe cases (S &gt; 60s):&quot;, safe_count, &quot;out 
 <pre><code>## Empirical probability of safety P(S &gt; 60): 0</code></pre>
 <pre class="r"><code>cat(paste(&quot;Desired probability level:&quot;, 0.95, &quot;\n&quot;))</code></pre>
 <pre><code>## Desired probability level: 0.95</code></pre>
-<p><strong>Do not forget to include several sentences summarizing your
-work and the conclusions you have made!</strong></p>
+<p><strong>Conclusion for task 3</strong></p>
+<p><strong>For part 1:</strong> As n increases (5→10→50), the
+distribution of means increasingly approaches normal (max_diff
+decreases). <strong>For part 2:</strong> CLT provides the most practical
+result for determining a safe number of samples.</p>
+<p>So, in general We modeled a Geiger counter with the exponential
+distribution. We showed that when you average the time between clicks,
+the average becomes normally distributed if you use a large enough
+sample size (like 50). This worked well. And also we tried to find the
+maximum number of radioactive samples that could be stored safely.</p>
 <hr />
 </div>
 </div>

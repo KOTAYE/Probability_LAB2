@@ -22,6 +22,12 @@ output:
 
 ------------------------------------------------------------------------
 
+**Sofiia Vitchynkina : Task 1**
+
+**Sofiia Trush : Task 3 and Task 4**
+
+**Viktor Syrotiuk : Task 2**
+
 ### Task 1
 
 #### In this task, we discuss the $[7,4]$ Hamming code and investigate its reliability. That coding system can correct single errors in the transmission of $4$-bit messages and proceeds as follows:
@@ -190,8 +196,6 @@ The 95% confidence interval is narrow, meaning our estimate is reliable when the
 
 Overall, the results match the theory and make sense for an error-correcting code with a low noise level.
 
-**Do not forget to include several sentences summarizing your work and the conclusions you have made!**
-
 ------------------------------------------------------------------------
 
 ### Task 2.
@@ -220,8 +224,8 @@ T_years <- 30.1
 T <- T_years * 365 * 24 * 3600
 lambda <- log(2) / T
 
-team_id <- 15
-m <- team_id * 10^-6
+id <- 15
+m <- id * 10^-6
 
 M <- 137
 N_A <- 6 * 10^23
@@ -629,10 +633,9 @@ cat(paste("Desired probability level:", 0.95, "\n"))
 
 **Conclusion for task 3**
 
-**For part 1:** As n increases (5→10→50), the distribution of means increasingly approaches normal (max_diff decreases). 
-**For part 2:** CLT provides the most practical result for determining a safe number of samples.
+**For part 1:** As n increases (5→10→50), the distribution of means increasingly approaches normal (max_diff decreases). **For part 2:** CLT provides the most practical result for determining a safe number of samples.
 
-So, in general We modeled a Geiger counter with the exponential distribution. We showed that when you average the time between clicks, the average becomes normally distributed if you use a large enough sample size (like 50). This worked well. And also we tried to find the maximum number of radioactive samples that could be stored safely. 
+So, in general We modeled a Geiger counter with the exponential distribution. We showed that when you average the time between clicks, the average becomes normally distributed if you use a large enough sample size (like 50). This worked well. And also we tried to find the maximum number of radioactive samples that could be stored safely.
 
 ------------------------------------------------------------------------
 
