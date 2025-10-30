@@ -512,6 +512,16 @@ N ≤ 100 / 3 \* 25
 
 =\> N ≤ 1.3333
 
+#### METHOD 2: Chernoff bound
+
+For the exponential distribution, the moment generating function (MGF) is: M_X(t) = ν / (ν - t) for t \< ν
+
+P(S ≥ 60) = P(e\^(tS) ≥ e\^(60t)) ≤ E[e\^(tS)] / e\^(60t)
+
+For the sum of 100 independent variables: M_S(t) = (ν / (ν - t))\^100
+
+We minimize the right-hand side with respect to t \< ν.
+
 #### METHOD 3: Central Limit Theorem
 
 **For our problem:**
@@ -546,21 +556,35 @@ N ≤ (100 - 16.45) / (60·ν₁)
 N ≤ 83.55 / (60·25) ≤ 0.0555
 
 ```{r}
-N_markov <- floor(100 / (3 * v1))
-cat("N_max (Markov) =", N_markov, "\n\n")
+N_markov <- 100 / (3 * v1)
+cat("N_max (Markov) =", floor(N_markov), "\n")
 
 
+chernoff_bound <- function(N, v1, target = 60) {
+  v <- N * v1
+
+  t_opt <- v - 100/target  
+  if (t_opt >= v || t_opt <= 0) return(Inf)
+  
+  bound <- ((v/(v - t_opt))^100) * exp(-t_opt * target)
+  return(bound)
+}
+
+N_test <- 0.1:1
+chernoff_values <- sapply(N_test, function(N) chernoff_bound(N, v1))
+N_chernoff <- max(N_test[chernoff_values <= 0.05])
+
+cat("N_max (Chernoff) =", N_chernoff, "\n")
 
 
-N_clt <- floor((100 - 16.45) / (60 * v1))
+N_clt <- (100 - 16.45) / (60 * v1)
 
-cat("N_max (CLT) =", N_clt, "\n\n")
+cat("N_max (CLT) =", floor(N_clt), "\n")
 
 cat("Method comparison\n")
 cat("Markov:   N ≤", N_markov, "\n")
-#cat("Chernoff: N ≤", N_chernoff, "\n")
+cat("Chernoff: N ≤", N_chernoff, "\n")
 cat("CLT:      N ≤", N_clt, "\n")
-
 ```
 
 -   simulate the realization $x_1,x_2,\dots,x_{100}$ of the $X_i$ and of the sum $S = X_1 + \cdots + X_{100}$;
@@ -603,7 +627,12 @@ cat(paste("Empirical probability of safety P(S > 60):", empirical_prob, "\n"))
 cat(paste("Desired probability level:", 0.95, "\n"))
 ```
 
-**Do not forget to include several sentences summarizing your work and the conclusions you have made!**
+**Conclusion for task 3**
+
+**For part 1:** As n increases (5→10→50), the distribution of means increasingly approaches normal (max_diff decreases). 
+**For part 2:** CLT provides the most practical result for determining a safe number of samples.
+
+So, in general We modeled a Geiger counter with the exponential distribution. We showed that when you average the time between clicks, the average becomes normally distributed if you use a large enough sample size (like 50). This worked well. And also we tried to find the maximum number of radioactive samples that could be stored safely. 
 
 ------------------------------------------------------------------------
 
