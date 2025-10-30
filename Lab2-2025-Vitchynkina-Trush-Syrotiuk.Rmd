@@ -425,7 +425,7 @@ for (n in n_values) {
 
     The output clearly shows that the two calculated values are different.
 
-    -   `1/X̄` (1/mean(X)) ≠ `Ȳ` (mean(Y) = mean(1/X)) is 0.07751244.
+    -   `1/X̄` (1/mean(X)) ≠ `Ȳ` (mean(Y) = mean(1/X)) 
 
     This confirms that E[1/X] ≠ 1/E[X].
 
