@@ -423,13 +423,13 @@ curve(pnorm(x, mean = mu, sd = sigma), col = "red", lwd = 2, add = TRUE)
 		     main = "Q-Q Plot: X vs Z (not indepedent)")
 		abline(0, 1, col = "pink", lwd = 2)
         ```
-	Analysis for X and Y:
+	**Analysis for X and Y:
 
 	QQ-plot: The points lie close to the line y=x. → This means X and Y have the same distribution (both are Exp(2)).
 	
 	Scatterplot: The points are scattered chaotically, without a pattern. → This means X and Y are independent.
 	
-	ANALYSIS for X and Z:
+	**ANALYSIS for X and Z:
 	
 	QQ-plot: The points don`t lie on the line y=x. → This means X and Z have different distributions .
 	
@@ -461,19 +461,56 @@ curve(pnorm(x, mean = mu, sd = sigma), col = "red", lwd = 2, add = TRUE)
 	
 	The trials are independent
 	
-	=> X ~ Binomial(n=3, p=0.5)
+	**=> X ~ Binomial(n=3, p=0.5)
 
     2.  What are the expected value and variance of X? Simulate realizations $x_1,x_2,\dots,x_{100}$ of $X$ to calculate the values of sample mean $\overline{\mathbf{X}}$ and sample variance $s^2 = \frac{\sum_{i=1}^{n}{(x_i - \overline{x})^{2}}}{n-1}$. Comment on the results;
 
         ```{r}
-        # YOUR CODE HERE
+        n <- 3
+		p <- 0.5
+		N <- 100
+		
+		theoretical_E_X <- n * p
+		theoretical_Var_X <- n * p * (1 - p)
+		
+		X <- rbinom(N, size = n, prob = p)
+		
+		sample_mean_X <- mean(X)
+		sample_var_X <- var(X)
+		# using formula
+		x_bar <- mean(X)
+		sample_var_X_method2 <- sum((X - x_bar)^2) / (N - 1)
+		
+		cat("Theoretical E[X]:", theoretical_E_X, "\n")
+		cat("Sample mean:", sample_mean_X, "\n")
+		cat("Theoretical Var(X):", theoretical_Var_X, "\n")
+		cat("Sample variance:", sample_var_X, "\n")
+		cat("using formula", sample_var_X_method2)
         ```
+		The empirical values are close to the theoretical ones. As N increases, they would converge even closer (because of LLN).
 
     3.  What are the expected value and variance of Y? Simulate realizations $y_1,y_2,\dots,y_{100}$ of $Y$ to calculate the values of sample mean $\overline{\mathbf{Y}}$ and sample variance $s^2 = \frac{\sum_{i=1}^{n}{(y_i - \overline{y})^{2}}}{n-1}$. Comment on the results;
 
         ```{r}
-        # YOUR CODE HERE
+        Y <- 0.5 * X - 1
+
+		theoretical_E_Y <- 0.5 * theoretical_E_X - 1
+		theoretical_Var_Y <- (0.5^2) * theoretical_Var_X
+		
+		sample_mean_Y <- mean(Y)
+		sample_var_Y <- var(Y)
+		# using formula
+		y_bar <- mean(Y)
+		sample_var_Y_method2 <- sum((Y - y_bar)^2) / (N - 1)
+		
+		cat("Theoretical E[Y]:", theoretical_E_Y, "\n")
+		cat("Sample mean:", sample_mean_Y, "\n")
+		cat("Theoretical Var(Y):", theoretical_Var_Y, "\n")
+		cat("Sample variance:", sample_var_Y, "\n")
+		cat("using formula", sample_var_Y_method2)
         ```
+		The empirical values are close to the theoretical ones. As N increases, they would converge even closer (because of LLN).
+		**Conclusion on the game: Since $E[Y] = -0.25$ , it means that, on average, your friend will lose £0.25 per game. (Y = revenue - costs => profit = Y = 0.5·X - 1) This is an unprofitable and unfair game for him.
 
 **Do not forget to include several sentences summarizing your work and the conclusions you have made!**
 
