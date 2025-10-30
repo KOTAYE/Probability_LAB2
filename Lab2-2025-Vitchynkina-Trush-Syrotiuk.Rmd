@@ -366,18 +366,74 @@ curve(pnorm(x, mean = mu, sd = sigma), col = "red", lwd = 2, add = TRUE)
     2.  Let $X \sim \mathscr{N}(\mu,\sigma^2)$ with $\mu = teamidnumber$ and $\sigma^{2} = 2\times teamidnumber+7$. Simulate realizations $x_1,x_2,\dots,x_{100}$ of $X$ and $y_1,y_2,\dots,y_{100}$ of $Y := \frac{1}{X}$ to calculate the values of $\frac{1}{\overline{\textbf{X}}}$ and $\overline{\textbf{Y}}$. Comment on the received results;
 
         ```{r}
-        mu <- 0 #change this!
-        sigma <- 1 #change this
-        N <- 100
-
-        # YOUR CODE HERE
+        id <- 15
+		mu <- id
+		sigma <- sqrt(2*id+7)
+		N <- 100
+		
+		x_sample <- rnorm(N, mean = mu, sd = sigma)
+		
+		y_sample <- 1 / x_sample
+		
+		
+		mean_X <- mean(x_sample)
+		one_over_mean_X <- 1/mean_X
+		mean_Y <- mean(y_sample)
+		
+		cat("Comparison:\n")
+		cat("1/X̄ =", one_over_mean_X, "\n")
+		cat("Ȳ =", mean_Y, "\n")
+		cat("Difference:", abs(one_over_mean_X - mean_Y))
         ```
+	The output clearly shows that the two calculated values are different.
+
+	1/X̄ (1/mean(X)) is 0.06451993.
+	
+	Ȳ (mean(Y) = mean(1/X)) is 0.07751244.
+	
+	This confirms that E[1/X] ≠ 1/E[X].
 
     3.  Let $X$ and $Y$ be exponentially distributed r.v.'s with parameter $\lambda = 2$. Set $Z := \log{X} + 5$. Plot the Quantile-Quantile plot and scatterplot of $X$ and $Y$. Plot the Quantile-Quantile plot and scatterplot of $X$ and $Z$. Explain the results. Comment on the difference of relations between the pairs of random variables. Which pair of r.v.'s is dependent and which one is similar?
 
         ```{r}
-        # YOUR CODE HERE
+        lambda <- 2
+		N <- 1000
+		
+		X <- rexp(N, rate = lambda)
+		Y <- rexp(N, rate = lambda)
+		Z <- log(X) + 5
+		
+		par(mfrow = c(1, 2))
+		
+		
+		plot(X, Y, 
+		     main = "Scatterplot: X vs Y (independent)",
+		     xlab = "X", ylab = "Y", col = "purple")
+		
+		qqplot(X, Y, 
+		     main = "Q-Q Plot: X vs Y (independent)")
+		abline(0, 1, col = "pink", lwd = 2)
+		
+		
+		plot(X, Z, 
+		     main = "Scatterplot: X vs Z (not independent)",
+		     xlab = "X", ylab = "Z = log(X)+5", col = "purple")
+		
+		qqplot(X, Z, 
+		     main = "Q-Q Plot: X vs Z (not indepedent)")
+		abline(0, 1, col = "pink", lwd = 2)
         ```
+	Analysis for X and Y:
+
+	QQ-plot: The points lie close to the line y=x. → This means X and Y have the same distribution (both are Exp(2)).
+	
+	Scatterplot: The points are scattered chaotically, without a pattern. → This means X and Y are independent.
+	
+	ANALYSIS for X and Z:
+	
+	QQ-plot: The points don`t lie on the line y=x. → This means X and Z have different distributions .
+	
+	Scatterplot: There is a clear logarithmic relationship. → Z=log(X)+5 . → This means X and Z are dependent.
 
     ------------------------------------------------------------------------
 
@@ -394,6 +450,18 @@ curve(pnorm(x, mean = mu, sd = sigma), col = "red", lwd = 2, add = TRUE)
         -   Poisson distributed
 
         -   Uniformly distributed
+
+	So, because of:
+
+	Fixed number of trials: n = 3
+	
+	Two possible outcomes: Heads or Tails
+	
+	Constant probability of success: p = 0.5
+	
+	The trials are independent
+	
+	=> X ~ Binomial(n=3, p=0.5)
 
     2.  What are the expected value and variance of X? Simulate realizations $x_1,x_2,\dots,x_{100}$ of $X$ to calculate the values of sample mean $\overline{\mathbf{X}}$ and sample variance $s^2 = \frac{\sum_{i=1}^{n}{(x_i - \overline{x})^{2}}}{n-1}$. Comment on the results;
 
